@@ -5,9 +5,10 @@ import { useState } from "react";
 import type { Entry } from "../types/Entry";
 import { areDatesEqual } from "../utils/dateCompare";
 import { PresetItems } from "../types/ListItem";
+import { Notes } from "../features/journal/Notes";
 
 export default function JournalEntry() {
-    const [entries, setEntries] = useState<Entry[]>([{date: new Date(), numDoodies: 0, items: [...PresetItems]}]);
+    const [entries, setEntries] = useState<Entry[]>([{date: new Date(), numDoodies: 0, items: [...PresetItems], notes: ''}]);
     const [currentDate, setCurrentDate] = useState(new Date);
 
     const currentEntry = () => entries.find(f => areDatesEqual(f.date, currentDate))!;
@@ -23,6 +24,19 @@ export default function JournalEntry() {
                 return m;
             });
         });
+    }
+
+    // get the current entry, update the notes field, save in all entries list
+    function updateEntryNotes(text: string) {
+        setEntries((prev) => {
+            return prev.map(m => {
+                if (areDatesEqual(m.date, currentDate)) {
+                    return {...m, notes: text};
+                }
+                
+                return m;
+            });
+        })
     }
 
     // when the checkbox changes, update that item for the current entry
@@ -55,7 +69,7 @@ export default function JournalEntry() {
         setCurrentDate(date);
 
         if (!entries.find(f => areDatesEqual(f.date, date))) {
-            const newEntry = {date: date, numDoodies: 0, items: [...PresetItems]};
+            const newEntry = {date: date, numDoodies: 0, items: [...PresetItems], notes: ''};
 
             setEntries((prev) => {
                 return [
@@ -70,6 +84,7 @@ export default function JournalEntry() {
         <>
             <DatePicker date={currentEntry().date} selectDate={getEntryByDate} />
             <Checklist items={currentEntry().items} onItemChange={handleChecklistItemChange} />
+            <Notes text={currentEntry().notes} updateNotes={updateEntryNotes}></Notes>
             <DoodieCounter count={currentEntry().numDoodies} updateCount={incrementDoodieCounter} />
         </>
     )

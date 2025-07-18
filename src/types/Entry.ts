@@ -4,4 +4,5 @@ export interface Entry {
     date: Date;
     items: ListItem[];
     numDoodies: number;
+    notes: string;
 }
